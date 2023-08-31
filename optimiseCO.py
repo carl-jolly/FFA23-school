@@ -4,31 +4,15 @@ import os
 import read_dat
 import numpy as np
 import time
-import json
-from opal_input_file import OpalInputFile
-with open("configs.json", "r") as jsonfile:
-    configs = json.load(jsonfile)
-    filepaths = configs['filepaths']
-    filenames = configs['filenames']
-
-
-
-#def write_dist_file(filename, x, y, z, Px='0.0',Py='0.0',Pz='0.0'):#
-#
-#    with open(filepath +  filename, 'w') as f:
-#        f.write('1') # 1 particle
-#        f.write(str(x)+ ' '+str(Px)+' '+ str(y)+ ' '+str(Py)+' '+ str(z)+' '+ str(Pz))
-#        f.close()
 
 class ClosedOrbitFinder():
-    def __init__(self, *args):
-        self.k_value = args[0]
-        self.F_mag_field = args[1]
-        self.D_mag_field = args[2]
-        self.energy = args[3]
+    def __init__(self, input_filepath, input_filename, distribution_file):
+        self.input_filepath = input_filepath
+        self.input_filename = input_filename
+        self.distribution_file = distribution_file
         self.probes = None
 
-    def run_opal(self, xPxcoords,steps_per_turn=2850, filepath=filepaths["root_path"], filename=filenames['FD_16_cell_benchmark'], z=0.0,Pz=0.0):
+    def run_opal(self, xPxcoords , z=0.0,Pz=0.0):
         '''
         run opal input file above and then find CO by optimizing the parameters in xPxcoords, more paramters 
         may be added. 
@@ -37,34 +21,25 @@ class ClosedOrbitFinder():
         ie minimizes the change in radius and radiual momentum from the start of a cell to the end.
 
         ''' 
-        dist_filename = filenames["12MeV_CO_coords"]
 
-
-        num_turns = 1
-        num_particles = 1
-        create_trackorbit = 0
-        Field_map = False
-        include_RF = False
-
-        OpalInputFile(num_turns, dist_filename, create_trackorbit, steps_per_turn, num_particles, Field_map, include_RF, self.energy, self.k_value, self.F_mag_field, self.D_mag_field).benchamrk_lattice(filepath, filename)
-
-        with open(filepath +  dist_filename, 'w') as f:
+        with open(self.distribution_file, 'w') as f:
 
             f.write('1\n') # 1 particle
             f.write(str(xPxcoords[0])+ ' '+str(xPxcoords[1])+' '+ str(0.0)+ ' '+str(0.0)+' '+ str(z)+' '+ str(Pz))
             f.close()
-        print('input = ', xPxcoords)
+        print('Optimiser input = ', xPxcoords)
 
-        os.system(filepaths["opal_exe_path"] +' --info 0 ' + filepath + filename)
-
+        os.system('opal --info 0 ' + self.input_filepath + self.input_filename)
+        print("input command")
+        print('opal --info 0 ' + self.input_filepath + self.input_filename)
 
         # read probes
         self.probes = []
         num_cells = 16# number of probes must be the same as the number of cells
         for i in range(1,num_cells+1):
             try:
-                self.probes.append(read_dat.read_probe(filepath=filepaths["probe_filepath"], filename='PROBE'+str(i)+'.loss'))
-                os.remove(filepaths["probe_filepath"]+'PROBE'+str(i)+'.loss')
+                self.probes.append(read_dat.read_probe(self.input_filepath, filename='PROBE'+str(i)+'.loss'))
+                os.remove(self.input_filepath+'PROBE'+str(i)+'.loss')
             except FileNotFoundError:
                 self.probes.append(DataFrame(data={'# x (m)':[np.random.rand()*10000], 'y (m)':[np.random.rand()*10000], 'px ( )':[np.random.rand()*10000], 'py ( )':[np.random.rand()*10000]}))
 
@@ -88,19 +63,13 @@ class ClosedOrbitFinder():
 
         for k,n in enumerate(phi):
             Pxcoords_rot.append(np.cos(n)*Pxcoords[k] - np.sin(n)*Pycoords[k])
-            # Px_arr is chnaging here so need a new variable
+            # Px_arr is changing here so need a new variable
             Pycoords_rot.append(np.sin(n)*Pxcoords[k] + np.cos(n)*Pycoords[k])
 
-        Pxcoords_rot =np.array(Pxcoords_rot) # do I need to rotate the momentum coords?
+        Pxcoords_rot =np.array(Pxcoords_rot)
         Pycoords_rot =np.array(Pycoords_rot)
 
 
-        #import matplotlib.pyplot as plt
-        #plt.scatter(xcoords, ycoords)
-        #plt.axes().set_aspect('equal')
-        #plt.show()
-        print('len xcoords = ',len(xcoords))
-        print(xcoords)
         rcoords = xcoords*xcoords + ycoords*ycoords
         diff=0
         for i in range(len(rcoords)):
@@ -111,21 +80,12 @@ class ClosedOrbitFinder():
             diff += np.sqrt(diffr + diffPx + diffPy)
 
 
-        #diffr = abs(np.sum(np.diff(rcoords)))
-        #diffPr = abs(np.sum(np.diff(Pxcoords_rot)) + np.sum(np.diff(Pycoords_rot) ))
-        #diffPr = abs(np.sum(np.diff(Pxcoords*Pxcoords + Pycoords*Pycoords)))
-        #iffPr = abs(np.sum(np.diff(Pxcoords))+ np.sum(np.diff(Pycoords)))
-        #diff = diffr +diffPr
-        print('diffr = ', diffr)
-        #print('diffPr = ', diffPr)
-        print('diff =', diff)
+        print('cell to cell position change = ', diffr)
+        print('Optimisation value ', diff)
         return diff
 
     def main(self, initial_x, initial_px):
         t1 = time.time()
-        #minimize(run_opal, x0=[5.051859350125676, -0.009517835658783173], method='Nelder-Mead', options={'disp':True})
-        #minimize(run_opal, x0=[4.0, 0.0], method='Powell', bounds=((3.5,4.5),(-0.05,0.05)), options={'disp':True, 'xtol':1e-7, 'ftol':1e-7})
-        #minimize(run_opal, x0=[4.0, 0.0], method='L-BFGS-B', bounds=((4.0,4.5),(-0.01,0.01)), options={'disp':True})
         res = minimize(self.run_opal, x0=[initial_x, initial_px], method='Nelder-Mead', options={'disp':True, 'xatol':1e-6, 'fatol':1e-6})
 
         t2 = time.time()
@@ -135,5 +95,19 @@ class ClosedOrbitFinder():
 
 
 if __name__ == "__main__":
-    ClosedOrbitFinder(6.6841968722339296, -0.2778341842733474, 0.10090213357455474).main(4.0, 0.0)
+    # example inputs
+    print("THINGS TO CHECK:")
+    print("Make sure you've set the distribution filename correctly in the opal input file.")
+    print("Make sure you've set the number of turns to 1 when finding a closed orbit")
+    print("Make sure that the DUMPFIELD is set to false and the RF is off")
+
+    # Don't forget the / at the end
+    path = "/home/carl/Documents/FFA23-school/"
+    input_name = "DF_lattice"
+    #input_name = "FFA_FODO_lattice"
+    distribution_filename = "CO_coords_3MeV.dat"
+
+    initial_x_guess  = 4.0
+    initial_px_guess = 0.0
+    ClosedOrbitFinder(path, input_name, distribution_filename).main(initial_x_guess, initial_px_guess)
 

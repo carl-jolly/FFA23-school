@@ -1,5 +1,4 @@
 import pandas as pd
-import h5py
 '''
 def delete_header(filepath, filename, num_lines):
     
@@ -69,11 +68,3 @@ def read_FieldMapRPHI(filepath, filename):
     dataframe.columns = ['r [mm]','phi [degree]','z [mm]','t [ns]','Br [kGauss]','Bphi [kGauss]','Bz [kGauss]','Er [MV/m]','Ephi [MV/m]','Ez [MV/m]']
     return dataframe
 
-def read_hdf5(filepath, filename):
-    #h5_df = pd.HDFStore(filepath+filename, 'r')
-    #print(h5_df.keys())
-    h5 = h5py.File(filepath+filename,'r')    
-    print(list(h5.keys()))
-    print(h5['Step#1'])
-    #print(h5[...])
-    # doesnt work on the h5 file that opal outputs by default. might work on the files it makes with hdf5=true in the input file 

@@ -1,0 +1,20 @@
+{  
+    "filepaths": {  
+        "root_path":       "/home/carl/Documents/FFA23-school/"  ,
+        "bench_CO_dir": "/home/carl/Documents/FFA23-school/co_dir/",
+        "opal_exe_path": "opal "
+        
+    }  ,
+
+    "filenames": {  
+        "FD_16_cell_benchmark":       "benchmark_lattice",  
+        "XYfieldmap":      "FieldMapXY.dat",   
+        "RPHIfieldmap":   "FieldMapRPHI.dat",
+        "track-orbit": "-trackOrbit.dat",
+        "inputdist":    "perturbed_dist.dat",
+        "3MeV_CO_coords":    "CO_coords_3MeV.dat",
+        "12MeV_CO_coords":    "CO_coords_12MeV.dat",
+        "outputfile": "DA_output.txt"
+    }  
+
+}  
