@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 '''
 def delete_header(filepath, filename, num_lines):
     
@@ -20,7 +21,7 @@ def read_trackOrbit(filepath, filename):
     '''
     #delete_header(filepath, filename, num_lines=2)
 
-    dataframe = pd.read_csv(filepath + filename, delim_whitespace=True, header=None, skiprows=range(0,2))
+    dataframe = pd.read_csv(os.path.join(filepath, filename), delim_whitespace=True, header=None, skiprows=range(0,2))
     dataframe.columns = ['# Part. ID','x [m]','beta_x*gamma','y [m]','beta_y*gamma','z [m]','beta_z*gamma']
     
 
@@ -34,7 +35,7 @@ def read_Angle(filepath, filename):
 
     #delete_header(filepath, filename, num_lines=1)
     
-    dataframe = pd.read_csv(filepath + filename, delim_whitespace=True, header=None, skiprows=range(0,2), error_bad_lines=False)
+    dataframe = pd.read_csv(os.path.join(filepath, filename), delim_whitespace=True, header=None, skiprows=range(0,2), error_bad_lines=False)
 
     dataframe = dataframe.drop(range(0, dataframe.shape[0], 2))
     dataframe = dataframe.drop(columns=[6, 7])
@@ -45,14 +46,14 @@ def read_Angle(filepath, filename):
 
 def read_probe(filepath, filename):
     #   # x (m),  y (m),  z (m),  px ( ),  py ( ),  pz ( ), id,  turn ( ), bunchNumber ( ), time (s)
-    dataframe = pd.read_csv(filepath + filename, delim_whitespace=True,header=None, skiprows=range(0,1))
+    dataframe = pd.read_csv(os.path.join(filepath, filename), delim_whitespace=True,header=None, skiprows=range(0,1))
     dataframe.columns = ['# x (m)',  'y (m)', ' z (m)',  'px ( )',  'py ( )',  'pz ( )', 'id',  'turn ( )', 'bunchNumber ( )', 'time (s)']
 
     return dataframe
 
 def read_FieldMap(filepath, filename):
 
-    dataframe = pd.read_csv(filepath + filename, delim_whitespace=True, header=None,skiprows=range(0,13))
+    dataframe = pd.read_csv(os.path.join(filepath, filename), delim_whitespace=True, header=None,skiprows=range(0,13))
     
     #dataframe.columns = ['x [mm]','y [mm]','z [mm]','t [ns]','Bx [kGauss]','By [kGauss]', 'Bz [kGauss]', 'Ex [MV/m]', 'Ey [MV/m]', 'Ez [MV/m]']
     #dataframe.columns = ['x [mm]','y [mm]','z [mm]','Bx [kGauss]','By [kGauss]', 'Bz [kGauss]']
@@ -61,7 +62,7 @@ def read_FieldMap(filepath, filename):
 
 def read_FieldMapRPHI(filepath, filename):
 
-    dataframe = pd.read_csv(filepath + filename, delim_whitespace=True, header=None,skiprows=range(0,12))
+    dataframe = pd.read_csv(os.path.join(filepath, filename), delim_whitespace=True, header=None,skiprows=range(0,12))
     
     #dataframe.columns = ['x [mm]','y [mm]','z [mm]','t [ns]','Bx [kGauss]','By [kGauss]', 'Bz [kGauss]', 'Ex [MV/m]', 'Ey [MV/m]', 'Ez [MV/m]']
     #dataframe.columns = ['x [mm]','y [mm]','z [mm]','Bx [kGauss]','By [kGauss]', 'Bz [kGauss]']

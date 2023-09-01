@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// Input file for single bunch tracking through FETS-FFA ring              //
+// Input file for single bunch tracking                                     //
 //////////////////////////////////////////////////////////////////////////////
 Title,string="FETS-FFA test simulation using OPAL code";
 Option, ASCIIDUMP=TRUE;

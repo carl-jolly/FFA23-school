@@ -6,7 +6,8 @@ import numpy as np
 import time
 
 class ClosedOrbitFinder():
-    def __init__(self, input_filepath, input_filename, distribution_file):
+    def __init__(self, num_cells, input_filepath, input_filename, distribution_file):
+        self.num_cells = num_cells
         self.input_filepath = input_filepath
         self.input_filename = input_filename
         self.distribution_file = distribution_file
@@ -14,10 +15,8 @@ class ClosedOrbitFinder():
 
     def run_opal(self, xPxcoords , z=0.0,Pz=0.0):
         '''
-        run opal input file above and then find CO by optimizing the parameters in xPxcoords, more paramters 
-        may be added. 
-        Cell opening angle is in deg
-        function minimizes the difference in x Px and y Py at the start and end of each cell in on turn
+        run opal input file and then find CO by optimizing the parameters in xPxcoords, more paramters 
+        may be added. This function minimizes the difference in x Px and y Py at the start and end of each cell in one turn
         ie minimizes the change in radius and radiual momentum from the start of a cell to the end.
 
         ''' 
@@ -27,19 +26,22 @@ class ClosedOrbitFinder():
             f.write('1\n') # 1 particle
             f.write(str(xPxcoords[0])+ ' '+str(xPxcoords[1])+' '+ str(0.0)+ ' '+str(0.0)+' '+ str(z)+' '+ str(Pz))
             f.close()
-        print('Optimiser input = ', xPxcoords)
 
-        os.system('opal --info 0 ' + self.input_filepath + self.input_filename)
-        print("input command")
-        print('opal --info 0 ' + self.input_filepath + self.input_filename)
+        os.system('opal --info 0 ' + os.path.join(self.input_filepath , self.input_filename))
+
+        #print("input command")
+        #print('opal --info 0 ' + os.path.join(self.input_filepath , self.input_filename),"\n")
 
         # read probes
         self.probes = []
-        num_cells = 16# number of probes must be the same as the number of cells
-        for i in range(1,num_cells+1):
+        
+        # number of probes must be the same as the number of cells
+        for i in range(1, self.num_cells+1):
             try:
                 self.probes.append(read_dat.read_probe(self.input_filepath, filename='PROBE'+str(i)+'.loss'))
-                os.remove(self.input_filepath+'PROBE'+str(i)+'.loss')
+                os.remove(os.path.join(self.input_filepath,'PROBE'+str(i)+'.loss'))
+
+            # if the 
             except FileNotFoundError:
                 self.probes.append(DataFrame(data={'# x (m)':[np.random.rand()*10000], 'y (m)':[np.random.rand()*10000], 'px ( )':[np.random.rand()*10000], 'py ( )':[np.random.rand()*10000]}))
 
@@ -80,8 +82,8 @@ class ClosedOrbitFinder():
             diff += np.sqrt(diffr + diffPx + diffPy)
 
 
-        print('cell to cell position change = ', diffr)
-        print('Optimisation value ', diff)
+        print('Optimiser input = ',xPxcoords, ' | cell to cell position change = ', diffr, '| Optimisation value = ', diff,end='\r')
+
         return diff
 
     def main(self, initial_x, initial_px):
@@ -99,15 +101,19 @@ if __name__ == "__main__":
     print("THINGS TO CHECK:")
     print("Make sure you've set the distribution filename correctly in the opal input file.")
     print("Make sure you've set the number of turns to 1 when finding a closed orbit")
-    print("Make sure that the DUMPFIELD is set to false and the RF is off")
+    print("Make sure that the DUMPFIELD is set to false and the RF is off \n\n")
 
-    # Don't forget the / at the end
-    path = "/home/carl/Documents/FFA23-school/"
-    input_name = "DF_lattice"
-    #input_name = "FFA_FODO_lattice"
+    # input dist file for Co at 3MeV
     distribution_filename = "CO_coords_3MeV.dat"
+    with open(os.path.join(os.getcwd(), distribution_filename), 'w') as f:
+        f.write('1\n') # 1 particle
+        f.write(str(4.0)+ ' '+str(0.0)+' '+ str(0.0)+ ' '+str(0.0)+' '+ str(0.0)+' '+ str(0.0))
+        f.close()
+        
+    path = os.getcwd()
+    input_name = "DF_lattice"
 
     initial_x_guess  = 4.0
     initial_px_guess = 0.0
-    ClosedOrbitFinder(path, input_name, distribution_filename).main(initial_x_guess, initial_px_guess)
+    ClosedOrbitFinder(16, path, input_name, distribution_filename).main(initial_x_guess, initial_px_guess)
 
