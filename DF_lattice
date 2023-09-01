@@ -11,7 +11,7 @@
         Option, ECHO=FALSE;
 
         
-        Option, SPTDUMPFREQ=0;
+        Option, SPTDUMPFREQ=1;
         ////////// CONSTANTS ////////////////////////////////////
         REAL DEGREE=PI/180.;
         REAL MM=1000.;
