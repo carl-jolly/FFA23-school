@@ -113,8 +113,10 @@ if __name__ == "__main__":
         
     path = os.getcwd()
     input_name = "DF_lattice"
-
-    initial_x_guess  = 4.0
+    print("4.0 is good for 3MeV, 4.4 for 12 MeV.")
+    print("Enter initial x coordinate in meters: ")
+    #initial_x_guess  = 4.0
+    initial_x_guess = input()
     initial_px_guess = 0.0
     ClosedOrbitFinder(16, path, input_name, distribution_filename).main(initial_x_guess, initial_px_guess)
 
