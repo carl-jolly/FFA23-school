@@ -99,6 +99,7 @@ class ClosedOrbitFinder():
 if __name__ == "__main__":
     # example inputs
     print("THINGS TO CHECK:")
+    print("Make sure this script is in the same directory as the OPAL input file and you have sourced OPAL")
     print("Make sure you've set the distribution filename correctly in the opal input file.")
     print("Make sure you've set the number of turns to 1 when finding a closed orbit")
     print("Make sure that the DUMPFIELD is set to false and the RF is off \n\n")
