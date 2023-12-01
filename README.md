@@ -12,6 +12,8 @@ Numpy, Scipy, Matplotlib, Pandas
 Also PyNAFF (optional)  
 
 Files:  
+OPAL intro slides - FFA23-OPAL.pdf
+
 OPAL input files – DF_lattice, FFA_FODO_lattice  
 OPAL input distribution files – dist.dat, CO_coords_3MeV.dat, perturbed_coords_3MeV.dat  
 
